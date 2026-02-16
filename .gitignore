@@ -31,4 +31,4 @@ frontend/.vite/
 # Misc
 *.swp
 
-
+.env

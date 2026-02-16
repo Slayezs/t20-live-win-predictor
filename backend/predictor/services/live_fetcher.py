@@ -1,9 +1,11 @@
 import requests
 import os
+from django.conf import settings
 
 
-API_KEY = os.environ.get("RAPIDAPI_KEY")
-API_HOST = "cricbuzz-cricket.p.rapidapi.com"
+
+API_KEY = settings.API_KEY
+API_HOST = settings.API_HOST
 
 def fetch_live_match(match_id=None):
     headers = {
