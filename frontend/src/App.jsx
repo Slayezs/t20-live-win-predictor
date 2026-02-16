@@ -5,7 +5,7 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/live/0/");
+      const res = await fetch("https://t20-live-win-predictor.onrender.com/api/live/0/");
       const json = await res.json();
       setData(json);
     } catch (error) {
