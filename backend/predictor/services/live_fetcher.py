@@ -17,7 +17,12 @@ def fetch_live_match(match_id=None):
     live_response = requests.get(live_url, headers=headers)
 
     if live_response.status_code != 200:
-        return {"error": "Failed to fetch live matches"}
+        return {
+            "error": "RapidAPI request failed",
+            "status_code": live_response.status_code,
+            "response_text": live_response.text
+        }
+
 
     live_data = live_response.json()
 
