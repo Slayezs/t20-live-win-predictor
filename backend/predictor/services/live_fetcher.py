@@ -21,10 +21,6 @@ def fetch_live_match(match_id=None):
 
     now = time.time()
 
-    # ✅ If cache is still valid, return it
-    if CACHE["data"] and (now - CACHE["timestamp"] < CACHE_EXPIRY):
-        return CACHE["data"]
-
     headers = {
         "X-RapidAPI-Key": API_KEY,
         "X-RapidAPI-Host": API_HOST
@@ -33,17 +29,27 @@ def fetch_live_match(match_id=None):
     live_url = f"https://{API_HOST}/matches/v1/live"
     live_response = requests.get(live_url, headers=headers)
 
-    # ❌ If API fails but cache exists → return cached data
+    # 🔴 If API fails (quota exceeded or other error)
     if live_response.status_code != 200:
+
+        # ✅ If cached data exists, return last known good data
         if CACHE["data"]:
             return CACHE["data"]
 
+        # 🧪 If no cache, return demo data
         return {
-            "error": "RapidAPI request failed",
-            "status_code": live_response.status_code,
-            "response_text": live_response.text
+            "match_state": "Demo Mode",
+            "status": "API quota exceeded - showing demo data",
+            "team1": "England",
+            "team2": "Italy",
+            "real_score": "England 202/7 (19.6)",
+            "current_score": 73,
+            "overs_completed": 8.3,
+            "wickets_lost": 3,
+            "target": 203
         }
 
+    # 🟢 If API succeeds
     live_data = live_response.json()
 
     try:
@@ -97,7 +103,7 @@ def fetch_live_match(match_id=None):
             "target": target
         }
 
-        # ✅ Save to cache
+        # ✅ Save successful response in cache
         CACHE["data"] = response_data
         CACHE["timestamp"] = now
 
