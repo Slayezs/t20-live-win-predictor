@@ -5,24 +5,43 @@ function App() {
 
   const fetchData = async () => {
     try {
-      const res = await fetch("https://t20-live-win-predictor.onrender.com/api/live/0/");
+      const res = await fetch(
+        "https://t20-live-win-predictor.onrender.com/api/live/0/"
+      );
+
+      if (!res.ok) {
+        throw new Error("Backend not responding");
+      }
+
       const json = await res.json();
       setData(json);
     } catch (error) {
       console.error("Error fetching data:", error);
+
+      // Fallback state so UI never gets stuck
+      setData({
+        match_state: "Backend sleeping...",
+        status: "Render free tier waking up. Please wait.",
+        team1: "Loading",
+        team2: "Loading",
+        real_score: "—",
+        message: "Retrying shortly..."
+      });
     }
   };
 
   useEffect(() => {
     fetchData();
-    const interval = setInterval(fetchData, 50000);
+    const interval = setInterval(fetchData, 50000); // 50 seconds
     return () => clearInterval(interval);
   }, []);
 
-  if (!data) return <div className="loading">Loading match data...</div>;
+  if (!data) {
+    return <div className="loading">Loading match data...</div>;
+  }
 
-  const win = data.win_probability || 0;
-  const lose = data.lose_probability || 0;
+  const win = data.win_probability ?? 0;
+  const lose = data.lose_probability ?? 0;
 
   const winColor = win > 50 ? "green" : "red";
   const loseColor = lose > 50 ? "green" : "red";
@@ -32,24 +51,38 @@ function App() {
       <h1>🏏 T20 Live Predictor</h1>
 
       <div className="match-info">
-        <h2>{data.team1} vs {data.team2}</h2>
-        <p><strong>Match State:</strong> {data.match_state}</p>
-        <p><strong>Status:</strong> {data.status}</p>
-        <p><strong>Score:</strong> {data.real_score}</p>
+        <h2>
+          {data.team1} vs {data.team2}
+        </h2>
+
+        <p>
+          <strong>Match State:</strong> {data.match_state}
+        </p>
+
+        <p>
+          <strong>Status:</strong> {data.status}
+        </p>
+
+        <p>
+          <strong>Score:</strong> {data.real_score}
+        </p>
+
         {data.message && (
-            <div style={{
+          <div
+            style={{
               marginTop: "20px",
               padding: "10px",
               backgroundColor: "#334155",
               borderRadius: "8px"
-            }}>
-              {data.message}
-            </div>
-          )}
-
+            }}
+          >
+            {data.message}
+          </div>
+        )}
       </div>
 
-      {data.win_probability && (
+      {/* Probability Section */}
+      {data.win_probability !== undefined && (
         <div className="probability-section">
           <h3>Win Probability</h3>
 
