@@ -1,12 +1,13 @@
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, log_loss
 import joblib
+import os
 
 
 def train_model():
+    # Load dataset
     df = pd.read_csv("data/training_data.csv")
 
     features = [
@@ -28,8 +29,8 @@ def train_model():
         X, y, test_size=0.2, random_state=42
     )
 
-    base_model = RandomForestClassifier(n_estimators=150, random_state=42)
-    model = CalibratedClassifierCV(base_model, method='sigmoid', cv=3)
+    # Logistic Regression (lightweight + good for probability)
+    model = LogisticRegression(max_iter=1000)
 
     model.fit(X_train, y_train)
 
@@ -39,10 +40,13 @@ def train_model():
     print("Accuracy:", accuracy_score(y_test, preds))
     print("Log Loss:", log_loss(y_test, probs))
 
+    # Ensure models directory exists
+    os.makedirs("models", exist_ok=True)
+
     joblib.dump(model, "models/model.pkl")
     joblib.dump(features, "models/features.pkl")
 
-    print("Calibrated model saved successfully.")
+    print("Model saved successfully.")
 
 
 if __name__ == "__main__":
